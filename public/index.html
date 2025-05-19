@@ -1,0 +1,494 @@
+<html>
+
+<head>
+  <title>test download file and save to DB index</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    html,
+    body {
+      height: 100%;
+      display: flex;
+      padding-top: 5px;
+      align-items: flex-start;
+      justify-content: center;
+      background-color: #f0f0f0;
+    }
+  </style>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+  <div class="chat-container">
+    <!-- <div class="chat-container"> -->
+    <!-- <select name="model" id="model" style="width: 50%; text-align: left; margin-left: 0">
+      <option
+        value="https://huggingface.co/afrideva/TinyMistral-248M-SFT-v4-GGUF/resolve/main/tinymistral-248m-sft-v4.q8_0.gguf">
+        tinymistral-248m-sft-v4 q8_0 (265.26 MB)
+      </option>
+      <option
+        value="https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf">
+        TinyLlama/TinyLlama-1.1B-Chat-v1.0 Q4_K_M (669 MB)
+      </option>
+      <option value="https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q3_k_m.gguf">
+        Qwen/Qwen1.5-1.8B-Chat Q3_K_M (1.02 GB)
+      </option>
+      <option
+        value="https://huggingface.co/stabilityai/stablelm-2-zephyr-1_6b/resolve/main/stablelm-2-zephyr-1_6b-Q4_1.gguf">
+        stabilityai/stablelm-2-zephyr-1_6b Q4_1 (1.07 GB)
+      </option>
+      <option value="https://huggingface.co/TKDKid1000/phi-1_5-GGUF/resolve/main/phi-1_5-Q4_K_M.gguf">
+        microsoft/phi-1_5 Q4_K_M (918 MB)
+      </option>
+      <option value="https://huggingface.co/TheBloke/phi-2-GGUF/resolve/main/phi-2.Q3_K_M.gguf">
+        microsoft/phi-2 Q3_K_M (1.48 GB)
+      </option>
+    </select> -->
+
+
+    <!-- <button id="downloadBtn">Download</button> -->
+    <!-- <button id="saveToLocalBtn">Save to Local</button> -->
+    <!-- <div id="progressContainer">
+      <div id="progressBar"></div>
+    </div> -->
+    <div class="messages-container" id="messages" style="min-height: 250px;"></div>
+
+
+    <div class="chat-setting-container">
+      <select name="model" id="model" style="width: 100%; text-align: left; margin-left: 0">
+      </select>
+    </div>
+
+    <div class="message-input-container">
+      <input type="text" id="messageInput" placeholder="Type a message...">
+      <button id="sendButton">Send</button>
+    </div>
+
+  </div>
+
+  <!-- <!-- <textarea id="textPrompt"> </textarea> -->
+  <!-- <button id="btnGenText">Gen Text</button> -->
+
+  <script>
+    import("./js/constants.js").then((module) => {
+      console.log(module.llm);
+      // window.CMD_LLM_INIT = module.CMD_LLM_INIT;
+      window.config = module.llm;
+      // console.log(window.config);
+    });
+
+    // <select name="model" id="model" style="width: 50%; text-align: left; margin-left: 0">
+    //   <option
+    //     value="https://huggingface.co/afrideva/TinyMistral-248M-SFT-v4-GGUF/resolve/main/tinymistral-248m-sft-v4.q8_0.gguf">
+    //     tinymistral-248m-sft-v4 q8_0 (265.26 MB)
+    //   </option>
+    //   <option
+    //     value="https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf">
+    //     TinyLlama/TinyLlama-1.1B-Chat-v1.0 Q4_K_M (669 MB)
+    //   </option>
+    //   <option value="https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q3_k_m.gguf">
+    //     Qwen/Qwen1.5-1.8B-Chat Q3_K_M (1.02 GB)
+    //   </option>
+    //   <option
+    //     value="https://huggingface.co/stabilityai/stablelm-2-zephyr-1_6b/resolve/main/stablelm-2-zephyr-1_6b-Q4_1.gguf">
+    //     stabilityai/stablelm-2-zephyr-1_6b Q4_1 (1.07 GB)
+    //   </option>
+    //   <option value="https://huggingface.co/TKDKid1000/phi-1_5-GGUF/resolve/main/phi-1_5-Q4_K_M.gguf">
+    //     microsoft/phi-1_5 Q4_K_M (918 MB)
+    //   </option>
+    //   <option value="https://huggingface.co/TheBloke/phi-2-GGUF/resolve/main/phi-2.Q3_K_M.gguf">
+    //     microsoft/phi-2 Q3_K_M (1.48 GB)
+    //   </option>
+    // </select>
+
+    const cfgModels = [
+      {
+        name: "tinymistral-248m-sft-v4 q8_0 (265.26 MB)",
+        path: "https://huggingface.co/afrideva/TinyMistral-248M-SFT-v4-GGUF/resolve/main/tinymistral-248m-sft-v4.q8_0.gguf",
+        promptTpl: "<|im_start|>user\n{message}<|im_end|>\n<|im_start|>assistant",
+        sysPromptTpl: "",
+        sysPromptMsg: "",
+      },
+      {
+        name: "TinyLlama/TinyLlama-1.1B-Chat-v1.0 Q4_K_M (669 MB)",
+        path: "https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf",
+        promptTpl: "<|user|>\n{message}</s>\n<|assistant|>",
+        sysPromptTpl: "<|system|>\n{system_message}</s>",
+        SysPromptMsg: "You are a friendly chatbot who always responds in the style of a pirate."
+      }
+    ];
+
+    const worker = new Worker("./js/wasmWorker.js", { type: "module" });
+
+    worker.onmessage = (e) => {
+      console.log("Worker result:", e.data);
+    };
+
+    // const progressBar = document.getElementById("progressBar");
+    // const downloadButton = document.getElementById("downloadBtn");
+    // const saveToLocalButton = document.getElementById("saveToLocalBtn");
+    const selectModel = document.getElementById("model");
+    const textPrompt = document.getElementById("textPrompt");
+    const btnGenText = document.getElementById("btnGenText");
+
+    const messagesDiv = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+
+    let llmInitializedModel = "";
+
+    createHelperDisplayMsg("Type message and press ENTER [key] or Send [Button]");
+
+    cfgModels.forEach(cfgModel => {
+      const option = new Option(cfgModel.name, cfgModel.path);
+      selectModel.appendChild(option);
+    });
+
+    function modelGetSysPromptByName(modelName) {
+      const cfgModel = cfgModels.find(model => model.name === modelName);
+      if (cfgModel) {
+        return cfgModel.sysPromptTpl.replace("{system_message}", cfgModel.sysPromptMsg);
+      }
+      return "";
+    }
+
+    function modelGetPromptByName(modelName, message) {
+      const cfgModel = cfgModels.find(model => model.name === modelName);
+      if (cfgModel) {
+        return cfgModel.promptTpl.replace("{message}", message);
+      }
+      return "";
+    }
+
+    messageInput.addEventListener("keydown", function (event) {
+      console.log("KEY is enter");
+      if (event.key === "Enter") {
+        event.preventDefault(); // prevent form submission if needed
+        sendButton.click(); // simulate button click
+      }
+    });
+
+    sendButton.addEventListener('click', async () => {
+      const message = messageInput.value;
+      const sendDisplayMsg = createSendDisplayMsg(message);
+      messageInput.value = '';
+
+      const db = await indexedDBOpen();
+      const modelName = selectModel.options[selectModel.selectedIndex].text;
+      if ((await indexedDBIsExisted(db, modelName)) == false) {
+        console.log(modelName, " is NOT downloaded");
+        // const result = await download()
+        const resultDl = await createDownloadModel();
+        if (!resultDl) {
+          console.warn("Can not download the model");
+          return;
+        }
+      }
+
+      // check if it is initialized
+      if (llmInitializedModel != modelName) {
+        const result = await workerCallAvllmInit();
+        if (result) llmInitializedModel = modelName;
+      } else console.log("[llm has initialized.]");
+
+
+      await workerCallAvllmGen(message);
+
+    });
+
+
+    function createHelperDisplayMsg(message) {
+      const messageContainer = document.createElement('div');
+      const messageElement = document.createElement('div');
+      messageContainer.classList.add('message-container');
+      messageElement.textContent = message;
+
+      messageContainer.classList.add('sender-message-container');
+      messageElement.classList.add('message-helper');
+
+      messageContainer.appendChild(messageElement);
+      messagesDiv.appendChild(messageContainer);
+
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      return messageElement;
+
+    }
+
+    function createSendDisplayMsg(message) {
+      const messageContainer = document.createElement('div');
+      const messageElement = document.createElement('div');
+      messageContainer.classList.add('message-container');
+      messageElement.textContent = message;
+
+      messageContainer.classList.add('sender-message-container');
+      messageElement.classList.add('message-bubble', 'sender-message-bubble');
+
+      messageContainer.appendChild(messageElement);
+      messagesDiv.appendChild(messageContainer);
+
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      return messageElement;
+    }
+
+    function createResponseDisplayMsg() {
+      const messageContainer = document.createElement('div');
+      const messageElement = document.createElement('div');
+
+
+      messageContainer.classList.add('message-container');
+
+      messageElement.classList.add('message-bubble');
+      messageContainer.appendChild(messageElement);
+      messagesDiv.appendChild(messageContainer);
+
+      return messageElement;
+    }
+
+    // function test(){
+
+    //   const messageContainer = document.createElement('div');
+    //   const messageElement = document.createElement('div');
+    //   messageElement.textContent = "message";
+
+    //   messageContainer.classList.add('message-container');
+    //   messageElement.classList.add('message-bubble');
+
+    //   messageContainer.appendChild(messageElement);
+    //   messagesDiv.appendChild(messageContainer);
+
+    //   messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    //   let cnt = 0;
+
+    //   const timer = setInterval(() => {
+    //     messageElement.textContent = messageElement.textContent + " a";
+    //     console.log(messageElement.textContent);
+
+    //     cnt = cnt + 1;
+    //     if (cnt > 50)
+    //       clearInterval(timer);
+    //   }, 100);
+    // }
+
+    // test();
+
+    // downloadButton.addEventListener("click", async () => {
+    //   await createDownloadModel();
+    //   // await download;
+    // });
+
+    // saveToLocalButton.addEventListener("click", async () => {
+    // if (
+    //   llm_initialized != selectModel.options[selectModel.selectedIndex].text
+    // ) {
+    //   await avllm_initialize();
+    // }
+    // });
+
+    //   //   console.log("[DEBUG-01]");
+
+    // btnGenText.addEventListener("click", async () => {
+    //   console.log("gen text is clickeck: ", textPrompt.value);
+
+    //   /* check if it is downloaded */
+    //   const db = await indexedDBOpen();
+    //   const modelName = selectModel.options[selectModel.selectedIndex].text;
+    //   if ((await indexedDBIsExisted(db, modelName)) == false) {
+    //     console.log(modelName, " is NOT downloaded");
+    //     // const result = await download()
+    //     const resultDl = await createDownloadModel();
+    //     if (!resultDl) {
+    //       console.warn("Can not download the model");
+    //       return;
+    //     }
+    //   }
+
+    //   // check if it is initialized
+    //   if (llmInitializedModel != modelName) {
+    //     const result = await workerCallAvllmInit();
+    //     if (result) llmInitializedModel = modelName;
+    //   } else console.log("[llm has initialized.]");
+
+    //   // await workerCallAvllmGen("<|user|>\n" + textPrompt.value + "</s>\n<|assistant|>");
+    // });
+
+    function saveDataToIndexedDb(name, data) {
+      const request = indexedDB.open(window.config.INDEXED_DB_NAME, 1);
+
+      request.onupgradeneeded = (event) => {
+        console.log(`Database need to handle `);
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains("gguf"))
+          db.createObjectStore("gguf", { keyPath: "name" });
+      };
+
+      request.onerror = (event) => {
+        console.log("Database error:");
+      };
+
+      request.onsuccess = (event) => {
+        console.log("onsucess: is called.");
+        const db = event.target.result;
+        const trans = db.transaction("gguf", "readwrite");
+        const store = trans.objectStore("gguf");
+        store.put({ name: name, value: data });
+      };
+    }
+
+    function workerCallAvllmInit() {
+      return new Promise((resolve, reject) => {
+        const channelId = Math.random().toString(36);
+
+        function handler(e) {
+          const { functionName, channelId, result } = e.data;
+          console.log("[workerCallAvllmInit][handler] received.");
+          if (e.data.channelId === channelId) {
+            console.log("[workerCallAvllmInit] channel is removed.");
+            worker.removeEventListener("message", handler);
+            resolve(result.status);
+          }
+        }
+        worker.addEventListener("message", handler);
+        const modelName =
+          selectModel.options[selectModel.selectedIndex].text;
+
+        const sysPrompt = modelGetSysPromptByName(modelName);
+        worker.postMessage({
+          functionName: window.config.CMD_LLM_INIT,
+          channelId,
+          param: [modelName, sysPrompt],
+        });
+      });
+    }
+
+    function workerCallAvllmGen(message) {
+      console.log("[workerCallAvllmGen] ENTER");
+      return new Promise((resolve, reject) => {
+        const channelId = Math.random().toString(36);
+        const responseDisplayMsg = createResponseDisplayMsg();
+
+        function handler(e) {
+          console.log("[workerCallAvllmGen][handler]", e.data);
+          const { functionName, channelId, result } = e.data;
+
+          if (e.data.channelId === channelId) {
+            if (result.status == false) {
+              console.log("[workerCallAvllmGen] channel is removed.");
+              worker.removeEventListener("message", handler);
+              resolve();
+            } else {
+              console.log(result.data);
+              responseDisplayMsg.textContent += result.data;
+            }
+          }
+        }
+
+        worker.addEventListener("message", handler);
+        const modelName =
+          selectModel.options[selectModel.selectedIndex].text;
+
+        // apply template
+        // const message_tmpl = "<|user|>\n" + message + "</s>\n<|assistant|>";
+        const prompt = modelGetPromptByName(modelName, message);
+
+        worker.postMessage({
+          functionName: window.config.CMD_LLM_GEN_START,
+          channelId,
+          param: [prompt],
+        });
+      });
+    }
+
+    function createDownloadModel() {
+      return new Promise((resolve, reject) => {
+        const modelUrl =
+          selectModel.options[selectModel.selectedIndex].value;
+        const modelName =
+          selectModel.options[selectModel.selectedIndex].text;
+        // console.log("[createDownloadModel] ", modelUrl, ":", modelName);
+
+        fetch(modelUrl)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not OK");
+            }
+
+            const bodyLen = response.headers.get("Content-Length");
+            let loaded = 0;
+            const reader = response.body.getReader();
+
+            const chunks = [];
+
+            function readData() {
+              reader.read().then(({ done, value }) => {
+                if (done) {
+                  // save to Database Index
+                  saveDataToIndexedDb(modelName, new Blob(chunks));
+                  resolve(true);
+                } else {
+                  // console.log("[DEBUG][loaded] ", loaded, ", ", value);
+                  loaded += value.byteLength;
+                  chunks.push(value);
+                  readData();
+                }
+                progressBar.style.width = `${(loaded / bodyLen) * 100}%`;
+              });
+            }
+
+            readData();
+          })
+          .catch((error) => {
+            console.log("error ", error);
+            resolve(false);
+          });
+      });
+    }
+
+    // indexedDB utility
+    function indexedDBOpen() {
+      return new Promise((resolve, reject) => {
+        const requestDb = indexedDB.open(window.config.INDEXED_DB_NAME, 1);
+
+        requestDb.onupgradeneeded = () => {
+          console.log("onupgradeneeded is called.");
+        };
+
+        requestDb.onsuccess = () => resolve(requestDb.result);
+        requestDb.onerror = () => reject(requestDb.error);
+      });
+    }
+
+    function IndexedDbObjectStoreExistName(tx, name) {
+      return new Promise((resolve, reject) => {
+        const store = tx.objectStore(window.config.INDEXED_DB_OBJ);
+        const requestStore = store.get(name);
+        requestStore.onsuccess = (ev) => {
+          const data = ev.target.result;
+          if (data) resolve(data);
+          else reject(new Error("not found data"));
+        };
+        requestStore.onerror = (ev) => {
+          reject(ev.target.error);
+        };
+      });
+    }
+
+    async function indexedDBIsExisted(requestDbResult, name) {
+      try {
+        console.log(window.config.INDEXED_DB_OBJ, name);
+        const tx = requestDbResult.transaction(window.config.INDEXED_DB_OBJ, "readonly");
+        await IndexedDbObjectStoreExistName(tx, name);
+      } catch (error) {
+        console.log("[indexedDBIsExisted] ", error);
+        return false;
+      }
+      return true;
+    }
+  </script>
+
+</body>
+
+</html>
