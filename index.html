@@ -21,40 +21,7 @@
 
 <body>
   <div class="chat-container">
-    <!-- <div class="chat-container"> -->
-    <!-- <select name="model" id="model" style="width: 50%; text-align: left; margin-left: 0">
-      <option
-        value="https://huggingface.co/afrideva/TinyMistral-248M-SFT-v4-GGUF/resolve/main/tinymistral-248m-sft-v4.q8_0.gguf">
-        tinymistral-248m-sft-v4 q8_0 (265.26 MB)
-      </option>
-      <option
-        value="https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf">
-        TinyLlama/TinyLlama-1.1B-Chat-v1.0 Q4_K_M (669 MB)
-      </option>
-      <option value="https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q3_k_m.gguf">
-        Qwen/Qwen1.5-1.8B-Chat Q3_K_M (1.02 GB)
-      </option>
-      <option
-        value="https://huggingface.co/stabilityai/stablelm-2-zephyr-1_6b/resolve/main/stablelm-2-zephyr-1_6b-Q4_1.gguf">
-        stabilityai/stablelm-2-zephyr-1_6b Q4_1 (1.07 GB)
-      </option>
-      <option value="https://huggingface.co/TKDKid1000/phi-1_5-GGUF/resolve/main/phi-1_5-Q4_K_M.gguf">
-        microsoft/phi-1_5 Q4_K_M (918 MB)
-      </option>
-      <option value="https://huggingface.co/TheBloke/phi-2-GGUF/resolve/main/phi-2.Q3_K_M.gguf">
-        microsoft/phi-2 Q3_K_M (1.48 GB)
-      </option>
-    </select> -->
-
-
-    <!-- <button id="downloadBtn">Download</button> -->
-    <!-- <button id="saveToLocalBtn">Save to Local</button> -->
-    <!-- <div id="progressContainer">
-      <div id="progressBar"></div>
-    </div> -->
     <div class="messages-container" id="messages" style="min-height: 250px;"></div>
-
-
     <div class="chat-setting-container">
       <select name="model" id="model" style="width: 100%; text-align: left; margin-left: 0">
       </select>
@@ -67,9 +34,6 @@
 
   </div>
 
-  <!-- <!-- <textarea id="textPrompt"> </textarea> -->
-  <!-- <button id="btnGenText">Gen Text</button> -->
-
   <script>
     import("./js/constants.js").then((module) => {
       console.log(module.llm);
@@ -77,30 +41,6 @@
       window.config = module.llm;
       // console.log(window.config);
     });
-
-    // <select name="model" id="model" style="width: 50%; text-align: left; margin-left: 0">
-    //   <option
-    //     value="https://huggingface.co/afrideva/TinyMistral-248M-SFT-v4-GGUF/resolve/main/tinymistral-248m-sft-v4.q8_0.gguf">
-    //     tinymistral-248m-sft-v4 q8_0 (265.26 MB)
-    //   </option>
-    //   <option
-    //     value="https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf">
-    //     TinyLlama/TinyLlama-1.1B-Chat-v1.0 Q4_K_M (669 MB)
-    //   </option>
-    //   <option value="https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q3_k_m.gguf">
-    //     Qwen/Qwen1.5-1.8B-Chat Q3_K_M (1.02 GB)
-    //   </option>
-    //   <option
-    //     value="https://huggingface.co/stabilityai/stablelm-2-zephyr-1_6b/resolve/main/stablelm-2-zephyr-1_6b-Q4_1.gguf">
-    //     stabilityai/stablelm-2-zephyr-1_6b Q4_1 (1.07 GB)
-    //   </option>
-    //   <option value="https://huggingface.co/TKDKid1000/phi-1_5-GGUF/resolve/main/phi-1_5-Q4_K_M.gguf">
-    //     microsoft/phi-1_5 Q4_K_M (918 MB)
-    //   </option>
-    //   <option value="https://huggingface.co/TheBloke/phi-2-GGUF/resolve/main/phi-2.Q3_K_M.gguf">
-    //     microsoft/phi-2 Q3_K_M (1.48 GB)
-    //   </option>
-    // </select>
 
     const cfgModels = [
       {
@@ -126,11 +66,7 @@
     };
 
     // const progressBar = document.getElementById("progressBar");
-    // const downloadButton = document.getElementById("downloadBtn");
-    // const saveToLocalButton = document.getElementById("saveToLocalBtn");
     const selectModel = document.getElementById("model");
-    const textPrompt = document.getElementById("textPrompt");
-    const btnGenText = document.getElementById("btnGenText");
 
     const messagesDiv = document.getElementById('messages');
     const messageInput = document.getElementById('messageInput');
@@ -170,30 +106,74 @@
     });
 
     sendButton.addEventListener('click', async () => {
-      const message = messageInput.value;
-      const sendDisplayMsg = createSendDisplayMsg(message);
-      messageInput.value = '';
 
-      const db = await indexedDBOpen();
-      const modelName = selectModel.options[selectModel.selectedIndex].text;
-      if ((await indexedDBIsExisted(db, modelName)) == false) {
-        console.log(modelName, " is NOT downloaded");
-        // const result = await download()
-        const resultDl = await createDownloadModel();
-        if (!resultDl) {
-          console.warn("Can not download the model");
-          return;
+      // sendButton.disabled = true;
+      sendButton.disabled = true;
+
+      try {
+        const message = messageInput.value;
+        const sendDisplayMsg = createSendDisplayMsg(message);
+        messageInput.value = '';
+
+        // if the file has not been in indexedDB, download it and save
+        const db = await indexedDBOpen();
+        const modelName = selectModel.options[selectModel.selectedIndex].text;
+        if ((await indexedDBIsExisted(db, modelName)) == false) {
+
+          console.log(modelName, " is NOT downloaded");
+          const downloadModel = createCommonDisplayMsg();
+
+          // in case, download the file and show its progress 
+          // const resultDl = await createDownloadModel();
+          // if (!resultDl) {
+          //   console.warn("Can not download the model");
+          //   return;
+          // }
+
+          try {
+
+            const response = await fetch(selectModel.options[selectModel.selectedIndex].value);
+            const reader = response.body.getReader();
+            const content_len = response.headers.get("Content-Length");
+
+            let loaded = 0;
+            let chunks = [];
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done)
+                break;
+
+              chunks.push(value);
+              loaded += value.length;
+
+              const percentage = parseInt(loaded * 100 / content_len);
+              console.log(value.length, content_len);
+              downloadModel.textContent = `Downloading model: ${percentage} % (only for the first time)`;
+
+            }
+
+            if (loaded == content_len && (await saveDataToIndexedDb(modelName, new Blob(chunks))) == false)
+              throw new Error('load failed  ${loaded} - ${content_len}');
+
+          } catch (error) {
+            console.error("Error. ", error);
+            return;
+          }
+
         }
+
+        const responseDisplayMsg = createResponseDisplayMsg();
+        // check if it is initialized
+        if (llmInitializedModel != modelName) {
+          // const initModel = createCommonDisplayMsg();
+          const result = await workerCallAvllmInit();
+          if (result) llmInitializedModel = modelName;
+        } else console.log("[llm has initialized.]");
+
+        await workerCallAvllmGen(message, responseDisplayMsg);
+      } finally {
+        sendButton.disabled = false;
       }
-
-      // check if it is initialized
-      if (llmInitializedModel != modelName) {
-        const result = await workerCallAvllmInit();
-        if (result) llmInitializedModel = modelName;
-      } else console.log("[llm has initialized.]");
-
-
-      await workerCallAvllmGen(message);
 
     });
 
@@ -216,6 +196,20 @@
 
     }
 
+    function createCommonDisplayMsg(message) {
+      const messageContainer = document.createElement('div');
+      const messageElement = document.createElement('div');
+      messageContainer.classList.add('message-container');
+      messageElement.textContent = message;
+
+      messageElement.classList.add('message-bubble');
+      messageContainer.appendChild(messageElement);
+      messagesDiv.appendChild(messageContainer);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      return messageElement;
+    }
+
     function createSendDisplayMsg(message) {
       const messageContainer = document.createElement('div');
       const messageElement = document.createElement('div');
@@ -223,7 +217,7 @@
       messageElement.textContent = message;
 
       messageContainer.classList.add('sender-message-container');
-      messageElement.classList.add('message-bubble', 'sender-message-bubble');
+      messageElement.classList.add('message-bubble');
 
       messageContainer.appendChild(messageElement);
       messagesDiv.appendChild(messageContainer);
@@ -240,102 +234,40 @@
 
       messageContainer.classList.add('message-container');
 
-      messageElement.classList.add('message-bubble');
+      // messageElement.classList.add('message-bubble');
+      messageElement.classList.add('message-loader');
       messageContainer.appendChild(messageElement);
       messagesDiv.appendChild(messageContainer);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
       return messageElement;
     }
 
-    // function test(){
-
-    //   const messageContainer = document.createElement('div');
-    //   const messageElement = document.createElement('div');
-    //   messageElement.textContent = "message";
-
-    //   messageContainer.classList.add('message-container');
-    //   messageElement.classList.add('message-bubble');
-
-    //   messageContainer.appendChild(messageElement);
-    //   messagesDiv.appendChild(messageContainer);
-
-    //   messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-    //   let cnt = 0;
-
-    //   const timer = setInterval(() => {
-    //     messageElement.textContent = messageElement.textContent + " a";
-    //     console.log(messageElement.textContent);
-
-    //     cnt = cnt + 1;
-    //     if (cnt > 50)
-    //       clearInterval(timer);
-    //   }, 100);
-    // }
-
-    // test();
-
-    // downloadButton.addEventListener("click", async () => {
-    //   await createDownloadModel();
-    //   // await download;
-    // });
-
-    // saveToLocalButton.addEventListener("click", async () => {
-    // if (
-    //   llm_initialized != selectModel.options[selectModel.selectedIndex].text
-    // ) {
-    //   await avllm_initialize();
-    // }
-    // });
-
-    //   //   console.log("[DEBUG-01]");
-
-    // btnGenText.addEventListener("click", async () => {
-    //   console.log("gen text is clickeck: ", textPrompt.value);
-
-    //   /* check if it is downloaded */
-    //   const db = await indexedDBOpen();
-    //   const modelName = selectModel.options[selectModel.selectedIndex].text;
-    //   if ((await indexedDBIsExisted(db, modelName)) == false) {
-    //     console.log(modelName, " is NOT downloaded");
-    //     // const result = await download()
-    //     const resultDl = await createDownloadModel();
-    //     if (!resultDl) {
-    //       console.warn("Can not download the model");
-    //       return;
-    //     }
-    //   }
-
-    //   // check if it is initialized
-    //   if (llmInitializedModel != modelName) {
-    //     const result = await workerCallAvllmInit();
-    //     if (result) llmInitializedModel = modelName;
-    //   } else console.log("[llm has initialized.]");
-
-    //   // await workerCallAvllmGen("<|user|>\n" + textPrompt.value + "</s>\n<|assistant|>");
-    // });
-
     function saveDataToIndexedDb(name, data) {
-      const request = indexedDB.open(window.config.INDEXED_DB_NAME, 1);
 
-      request.onupgradeneeded = (event) => {
-        console.log(`Database need to handle `);
-        const db = event.target.result;
-        if (!db.objectStoreNames.contains("gguf"))
-          db.createObjectStore("gguf", { keyPath: "name" });
-      };
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(window.config.INDEXED_DB_NAME, 1);
+        request.onupgradeneeded = (event) => {
+          console.log(`Database need to handle `);
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains("gguf"))
+            db.createObjectStore("gguf", { keyPath: "name" });
+        };
 
-      request.onerror = (event) => {
-        console.log("Database error:");
-      };
+        request.onerror = (event) => {
+          console.log("Database error:");
+          resolve(false);
+        };
 
-      request.onsuccess = (event) => {
-        console.log("onsucess: is called.");
-        const db = event.target.result;
-        const trans = db.transaction("gguf", "readwrite");
-        const store = trans.objectStore("gguf");
-        store.put({ name: name, value: data });
-      };
+        request.onsuccess = (event) => {
+          console.log("onsucess: is called.");
+          const db = event.target.result;
+          const trans = db.transaction("gguf", "readwrite");
+          const store = trans.objectStore("gguf");
+          store.put({ name: name, value: data });
+          resolve(true);
+        };
+      });
     }
 
     function workerCallAvllmInit() {
@@ -364,12 +296,10 @@
       });
     }
 
-    function workerCallAvllmGen(message) {
+    function workerCallAvllmGen(message, responseDisplayMsg) {
       console.log("[workerCallAvllmGen] ENTER");
       return new Promise((resolve, reject) => {
         const channelId = Math.random().toString(36);
-        const responseDisplayMsg = createResponseDisplayMsg();
-
         function handler(e) {
           console.log("[workerCallAvllmGen][handler]", e.data);
           const { functionName, channelId, result } = e.data;
@@ -378,10 +308,15 @@
             if (result.status == false) {
               console.log("[workerCallAvllmGen] channel is removed.");
               worker.removeEventListener("message", handler);
+              responseDisplayMsg.classList.remove('message-loader');
               resolve();
             } else {
               console.log(result.data);
               responseDisplayMsg.textContent += result.data;
+              if (responseDisplayMsg.classList.contains('message-loader')) {
+                responseDisplayMsg.classList.replace('message-loader', 'message-bubble');
+                // responseDisplayMsg.classList.add('message-bubble');
+              }
             }
           }
         }
@@ -426,8 +361,8 @@
               reader.read().then(({ done, value }) => {
                 if (done) {
                   // save to Database Index
-                  saveDataToIndexedDb(modelName, new Blob(chunks));
-                  resolve(true);
+                  const result = saveDataToIndexedDb(modelName, new Blob(chunks));
+                  resolve(result);
                 } else {
                   // console.log("[DEBUG][loaded] ", loaded, ", ", value);
                   loaded += value.byteLength;
