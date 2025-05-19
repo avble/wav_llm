@@ -452,8 +452,11 @@
       return new Promise((resolve, reject) => {
         const requestDb = indexedDB.open(window.config.INDEXED_DB_NAME, 1);
 
-        requestDb.onupgradeneeded = () => {
-          console.log("onupgradeneeded is called.");
+        requestDb.onupgradeneeded = (event) => {
+          console.log(`Database need to handle `);
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains("gguf"))
+            db.createObjectStore("gguf", { keyPath: "name" });
         };
 
         requestDb.onsuccess = () => resolve(requestDb.result);
