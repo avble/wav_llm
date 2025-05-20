@@ -115,6 +115,12 @@
         const sendDisplayMsg = createSendDisplayMsg(message);
         messageInput.value = '';
 
+        {
+          const result = indexedDBCreateObj(window.config.INDEXED_DB_OBJ);
+          if (!result)
+            console.error("initialized is failed.");
+        }        
+
         // if the file has not been in indexedDB, download it and save
         const db = await indexedDBOpen();
         const modelName = selectModel.options[selectModel.selectedIndex].text;
@@ -241,10 +247,37 @@
       return messageElement;
     }
 
+    function indexedDBCreateObj(objName){
+      return new Promise((resolve, reject) => {
+        const requestDB =indexedDB.open(window.config.INDEXED_DB_NAME);
+
+        requestDB.onupgradeneeded = (event) => {
+          console.log("[onupgradeneeded] is called.");
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains(objName)){
+            console.log("Create object store ", objName);
+            db.createObjectStore(objName, {keyPath: "name"});
+            resolve(true);
+          }
+        }
+        requestDB.onsuccess = (event) => {
+          console.log("[onsuccess] is called.");
+          const db = event.target.result;
+          if (db.objectStoreNames.contains(objName)){
+            resolve(true);
+          }
+        }
+        requestDB.onerror = (event) => {
+          console.log("[onerror] is called.");
+          resolve(false);
+        }
+      });
+    }
+
     function saveDataToIndexedDb(name, data) {
 
       return new Promise((resolve, reject) => {
-        const request = indexedDB.open(window.config.INDEXED_DB_NAME, 1);
+        const request = indexedDB.open(window.config.INDEXED_DB_NAME);
         request.onupgradeneeded = (event) => {
           console.log(`Database need to handle `);
           const db = event.target.result;
