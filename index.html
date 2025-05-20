@@ -43,21 +43,66 @@
     });
 
     const cfgModels = [
+      // {
+      //   name: "tinymistral-248m-sft-v4 q8_0 (265.26 MB)",
+      //   path: "https://huggingface.co/afrideva/TinyMistral-248M-SFT-v4-GGUF/resolve/main/tinymistral-248m-sft-v4.q8_0.gguf",
+      //   promptTpl: "<|im_start|>user\n{message}<|im_end|>\n<|im_start|>assistant",
+      //   sysPromptTpl: "",
+      //   sysPromptMsg: "",
+      // },
+      // {
+      //   name: "tinymistral-248m-sft-v4 Q4 (157 MB)",
+      //   path: "https://huggingface.co/afrideva/TinyMistral-248M-SFT-v4-GGUF/resolve/main/tinymistral-248m-sft-v4.q4_k_m.gguf",
+      //   promptTpl: "<|im_start|>user\n{message}<|im_end|>\n<|im_start|>assistant",
+      //   sysPromptTpl: "",
+      //   sysPromptMsg: "",
+      // },      
+
+      // {
+      //   name: "M4-ai/TinyMistral-248M-v2-Instruct-GGUF Q6 (204)",
+      //   path: "https://huggingface.co/M4-ai/TinyMistral-248M-v2-Instruct-GGUF/resolve/main/TinyMistral-248M-v2-Instruct.Q6_K.gguf",
+      //   promptTpl: "<|im_start|>user\n{message}<|im_end|>\n<|im_start|>assistant\n<|endoftext|>",
+      //   sysPromptTpl: "",
+      //   sysPromptMsg: "",
+      // },
       {
-        name: "tinymistral-248m-sft-v4 q8_0 (265.26 MB)",
-        path: "https://huggingface.co/afrideva/TinyMistral-248M-SFT-v4-GGUF/resolve/main/tinymistral-248m-sft-v4.q8_0.gguf",
-        promptTpl: "<|im_start|>user\n{message}<|im_end|>\n<|im_start|>assistant",
+        name: "TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF Q3_K_L (593 MB)",
+        path: "https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q3_K_L.gguf",
+        promptTpl: "<|user|>\n{message}</s>\n<|assistant|>",
+        sysPromptTpl: "<|system|>\n{system_message}</s>",
+        sysPromptMsg: "You are helpful writing assistant."
+      },
+      {
+        name: "TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF (669 MB)",
+        path: "https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf",
+        promptTpl: "<|user|>\n{message}</s>\n<|assistant|>",
+        sysPromptTpl: "<|system|>\n{system_message}</s>",
+        sysPromptMsg: "You are helpful writing assistant."
+      },
+      {
+        name: "tensorblock/phi-1_5-GGUF - Q3_K_S.gguf (654 MB)",
+        path: "https://huggingface.co/tensorblock/phi-1_5-GGUF/resolve/main/phi-1_5-Q3_K_S.gguf",
+        promptTpl: "{message}",
         sysPromptTpl: "",
         sysPromptMsg: "",
       },
       {
-        name: "TinyLlama/TinyLlama-1.1B-Chat-v1.0 Q4_K_M (669 MB)",
-        path: "https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf",
-        promptTpl: "<|user|>\n{message}</s>\n<|assistant|>",
-        sysPromptTpl: "<|system|>\n{system_message}</s>",
-        SysPromptMsg: "You are a friendly chatbot who always responds in the style of a pirate."
-      }
+        name: "TheBloke/phi-2-GGUF - Q3_K_S.gguf (1.25 GB)",
+        path: "https://huggingface.co/TheBloke/phi-2-GGUF/resolve/main/phi-2.Q3_K_S.gguf",
+        promptTpl: "{message}",
+        sysPromptTpl: "",
+        sysPromptMsg: "",
+      },
+      // {
+      //   name: "MaziyarPanahi/gemma-2b-GGUF:Q3_K_S (1.29 GB)",
+      //   path: "https://huggingface.co/MaziyarPanahi/gemma-2b-GGUF/resolve/main/gemma-2b.Q3_K_S.gguf",
+      //   promptTpl: "<|im_start|>user\n{message}<|im_end|>\n<|im_start|>assistant",
+      //   sysPromptTpl: "<|im_start|>system\n{system_message}<|im_end|>",
+      //   sysPromptMsg: "You are a story writing assistant.",
+      // }
     ];
+
+    
 
     const worker = new Worker("./js/wasmWorker.js", { type: "module" });
 
@@ -83,7 +128,8 @@
 
     function modelGetSysPromptByName(modelName) {
       const cfgModel = cfgModels.find(model => model.name === modelName);
-      if (cfgModel) {
+      if (cfgModel && cfgModel.sysPromptTpl != "") {
+        console.log("modelGetSysPromptByName", cfgModel.sysPromptTpl, cfgModel.sysPromptMsg);
         return cfgModel.sysPromptTpl.replace("{system_message}", cfgModel.sysPromptMsg);
       }
       return "";
@@ -91,7 +137,9 @@
 
     function modelGetPromptByName(modelName, message) {
       const cfgModel = cfgModels.find(model => model.name === modelName);
-      if (cfgModel) {
+        console.log("modelGetPromptByName", cfgModel);
+        if (cfgModel && cfgModel.promptTpl != "") {
+        console.log("modelGetPromptByName", cfgModel.promptTpl, message);
         return cfgModel.promptTpl.replace("{message}", message);
       }
       return "";
@@ -342,7 +390,7 @@
               responseDisplayMsg.classList.remove('message-loader');
               resolve();
             } else {
-              console.log(result.data);
+              // console.log(result.data);
               responseDisplayMsg.textContent += result.data;
               if (responseDisplayMsg.classList.contains('message-loader')) {
                 responseDisplayMsg.classList.replace('message-loader', 'message-bubble');
@@ -359,6 +407,7 @@
         // apply template
         // const message_tmpl = "<|user|>\n" + message + "</s>\n<|assistant|>";
         const prompt = modelGetPromptByName(modelName, message);
+
 
         worker.postMessage({
           functionName: window.config.CMD_LLM_GEN_START,
