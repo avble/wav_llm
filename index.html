@@ -36,7 +36,7 @@
 
   <script>
     import("./js/constants.js").then((module) => {
-      console.log(module.llm);
+      // console.log(module.llm);
       // window.CMD_LLM_INIT = module.CMD_LLM_INIT;
       window.config = module.llm;
       // console.log(window.config);
@@ -98,7 +98,7 @@
     }
 
     messageInput.addEventListener("keydown", function (event) {
-      console.log("KEY is enter");
+      // console.log("KEY is enter");
       if (event.key === "Enter") {
         event.preventDefault(); // prevent form submission if needed
         sendButton.click(); // simulate button click
@@ -147,9 +147,8 @@
               loaded += value.length;
 
               const percentage = parseInt(loaded * 100 / content_len);
-              console.log(value.length, content_len);
+              // console.log(value.length, content_len);
               downloadModel.textContent = `Downloading model: ${percentage} % (only for the first time)`;
-
             }
 
             if (loaded == content_len && (await saveDataToIndexedDb(modelName, new Blob(chunks))) == false)
@@ -159,7 +158,6 @@
             console.error("Error. ", error);
             return;
           }
-
         }
 
         const responseDisplayMsg = createResponseDisplayMsg();
